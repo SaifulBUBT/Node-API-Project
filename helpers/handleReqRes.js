@@ -40,17 +40,7 @@ handler.handleReqRes = (req, res) => {
         headersObject
     }
 
-    const chosenHandler = routes[trimmedPath] ? routes[trimmedPath] : notFoundHandler;
-    chosenHandler(requestProperties, (statusCode, payload) => {
-        statusCode = typeof(statusCode) === 'number' ? statusCode : 500;
-        payload = typeof(payload) === 'object' ? payload : {};
-        const payloadString = JSON.stringify(payload);
-
-        // Return the final response
-        res.setHeader('Content-Type', 'application/json');
-        res.writeHead(statusCode);
-        res.end(payloadString);
-    });   
+    const chosenHandler = routes[trimmedPath] ? routes[trimmedPath] : notFoundHandler; 
     
     const decoder = new StringDecoder('utf-8');
     let realData = '';
@@ -62,7 +52,17 @@ handler.handleReqRes = (req, res) => {
     req.on('end', () => {
         realData += decoder.end();
         console.log(realData);
+        
+        chosenHandler(requestProperties, (statusCode, payload) => {
+            statusCode = typeof(statusCode) === 'number' ? statusCode : 500;
+            payload = typeof(payload) === 'object' ? payload : {};
+            const payloadString = JSON.stringify(payload);
 
+            // Return the final response
+            res.setHeader('Content-Type', 'application/json');
+            res.writeHead(statusCode);
+            res.end(payloadString);
+        });  
         // Response handling
         res.end(realData);
     })
